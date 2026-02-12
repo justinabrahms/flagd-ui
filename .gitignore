@@ -1,0 +1,14 @@
+# Go
+flagd-ui
+*.exe
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Embedded frontend (built files, not the .gitkeep)
+web/dist/*
+!web/dist/.gitkeep
+
+# OS
+.DS_Store
