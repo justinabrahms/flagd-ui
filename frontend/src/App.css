@@ -201,50 +201,45 @@
   font-family: var(--mono);
 }
 
-/* Collapsible description */
-.flag-description-details {
+.flag-description {
+  color: var(--text-muted);
   margin-bottom: 2rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-.flag-description-summary {
+/* Collapsible sections */
+.detail-summary {
   cursor: pointer;
-  color: var(--text-muted);
-  font-size: 0.875rem;
   list-style: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.flag-description-summary::-webkit-details-marker {
+.detail-summary::-webkit-details-marker {
   display: none;
 }
 
-.flag-description-summary::before {
+.detail-summary::before {
   content: "\25B6";
   font-size: 0.6rem;
+  color: var(--text-muted);
   transition: transform 0.15s;
 }
 
-.flag-description-details[open] > .flag-description-summary::before {
+details[open] > .detail-summary::before {
   transform: rotate(90deg);
 }
 
-.flag-description-preview {
-  color: var(--text-muted);
+.detail-summary h2 {
+  margin-bottom: 0;
 }
 
-.flag-description-full {
-  color: var(--text);
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+details.detail-section > .detail-card {
+  margin-top: 0.75rem;
 }
 
 .detail-section {

@@ -59,16 +59,7 @@ export function FlagDetail() {
       </div>
 
       {description && (
-        <details className="flag-description-details">
-          <summary className="flag-description-summary">
-            <span className="flag-description-preview">
-              {String(description).length > 80
-                ? String(description).slice(0, 80) + "..."
-                : String(description)}
-            </span>
-          </summary>
-          <p className="flag-description-full">{String(description)}</p>
-        </details>
+        <p className="flag-description">{String(description)}</p>
       )}
 
       <div className="detail-section">
@@ -138,12 +129,12 @@ export function FlagDetail() {
       )}
 
       {hasExtraMetadata && (
-        <div className="detail-section">
-          <h2>Metadata</h2>
+        <details className="detail-section">
+          <summary className="detail-summary"><h2>Metadata</h2></summary>
           <div className="detail-card">
             <pre>{JSON.stringify(extraMetadata, null, 2)}</pre>
           </div>
-        </div>
+        </details>
       )}
     </div>
   );
