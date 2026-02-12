@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const BASE = process.env.BASE_URL || "http://localhost:8080";
+const BASE = process.env.BASE_URL || "http://localhost:9090";
 const OUTPUT = process.env.OUTPUT || "demo/recording/flagd-ui-demo.webm";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

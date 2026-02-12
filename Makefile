@@ -27,13 +27,13 @@ clean:
 
 # Run the demo sandbox with sample flags.
 demo: build
-	@echo "Starting flagd-ui with demo flags at http://localhost:8080"
+	@echo "Starting flagd-ui with demo flags at http://localhost:9090"
 	./flagd-ui -flag-dir ./demo
 
 # Record a demo video (starts the server, records, then stops).
 record-demo: build
 	@mkdir -p demo/recording/raw
-	./flagd-ui -flag-dir ./demo -addr :8080 & \
+	./flagd-ui -flag-dir ./demo -addr :9090 & \
 		SERVER_PID=$$!; \
 		sleep 2; \
 		node demo/recording/record.mjs; \
