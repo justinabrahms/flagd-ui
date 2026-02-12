@@ -32,6 +32,15 @@ export function FlagDetail() {
 
   const variants = Object.entries(flag.variants);
 
+  // Strip description from metadata so it's not shown twice
+  const extraMetadata = flag.metadata
+    ? Object.fromEntries(
+        Object.entries(flag.metadata).filter(([k]) => k !== "description")
+      )
+    : null;
+  const hasExtraMetadata =
+    extraMetadata && Object.keys(extraMetadata).length > 0;
+
   return (
     <div>
       <Link to="/" className="flag-detail-back">
@@ -50,7 +59,16 @@ export function FlagDetail() {
       </div>
 
       {description && (
-        <p className="flag-description">{String(description)}</p>
+        <details className="flag-description-details">
+          <summary className="flag-description-summary">
+            <span className="flag-description-preview">
+              {String(description).length > 80
+                ? String(description).slice(0, 80) + "..."
+                : String(description)}
+            </span>
+          </summary>
+          <p className="flag-description-full">{String(description)}</p>
+        </details>
       )}
 
       <div className="detail-section">
@@ -80,25 +98,33 @@ export function FlagDetail() {
       <div className="detail-section">
         <h2>Variants ({variants.length})</h2>
         <div className="detail-card">
-          <ul className="variant-list">
-            {variants.map(([name, value]) => (
-              <li key={name} className="variant-item">
-                <span
-                  className={`variant-name ${
-                    name === flag.defaultVariant ? "is-default" : ""
-                  }`}
-                >
-                  {name}
-                  {name === flag.defaultVariant && " (default)"}
-                </span>
-                <span className="variant-value">
-                  {typeof value === "object"
-                    ? JSON.stringify(value, null, 2)
-                    : String(value)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <table className="variant-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {variants.map(([name, value]) => (
+                <tr key={name} className={name === flag.defaultVariant ? "is-default-row" : ""}>
+                  <td className="variant-name-cell">
+                    <code>{name}</code>
+                    {name === flag.defaultVariant && (
+                      <span className="badge badge-enabled">default</span>
+                    )}
+                  </td>
+                  <td className="variant-value-cell">
+                    <code>
+                      {typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
+                    </code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -111,11 +137,11 @@ export function FlagDetail() {
         </div>
       )}
 
-      {flag.metadata && Object.keys(flag.metadata).length > 0 && (
+      {hasExtraMetadata && (
         <div className="detail-section">
           <h2>Metadata</h2>
           <div className="detail-card">
-            <pre>{JSON.stringify(flag.metadata, null, 2)}</pre>
+            <pre>{JSON.stringify(extraMetadata, null, 2)}</pre>
           </div>
         </div>
       )}
