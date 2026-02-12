@@ -1,0 +1,289 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "new-checkout-flow": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          { "in": ["beta", { "var": "segment" }] },
+          "on",
+          "off"
+        ]
+      },
+      "metadata": {
+        "description": "Redesigned checkout with fewer steps and inline payment. Rolling out to beta users first, then expanding to all users after monitoring conversion rates for two weeks.",
+        "owner": "checkout-team"
+      }
+    },
+    "dark-mode": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "on",
+      "metadata": {
+        "description": "Dark mode theme toggle in user preferences.",
+        "owner": "frontend-platform"
+      }
+    },
+    "pricing-experiment": {
+      "state": "ENABLED",
+      "variants": {
+        "control": "monthly-only",
+        "variant-a": "annual-discount",
+        "variant-b": "usage-based"
+      },
+      "defaultVariant": "control",
+      "targeting": {
+        "fractional": [
+          { "var": "targeting_key" },
+          ["control", 34],
+          ["variant-a", 33],
+          ["variant-b", 33]
+        ]
+      },
+      "metadata": {
+        "description": "A/B/C test for pricing page layout. Control shows monthly plans only, variant A highlights annual discount, variant B introduces usage-based pricing. Running for 30 days, targeting new signups only.",
+        "owner": "growth-team"
+      }
+    },
+    "search-algorithm": {
+      "state": "ENABLED",
+      "variants": {
+        "elasticsearch": "elasticsearch",
+        "typesense": "typesense"
+      },
+      "defaultVariant": "elasticsearch",
+      "targeting": {
+        "if": [
+          { "in": [{ "var": "region" }, ["us-west-2", "eu-west-1"]] },
+          "typesense",
+          "elasticsearch"
+        ]
+      },
+      "metadata": {
+        "description": "Search backend migration from Elasticsearch to Typesense. Routing specific regions to Typesense while monitoring latency and relevance metrics.",
+        "owner": "search-team"
+      }
+    },
+    "maintenance-banner": {
+      "state": "DISABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "metadata": {
+        "description": "Shows a banner at the top of the page announcing scheduled maintenance. Enable before maintenance windows, disable after.",
+        "owner": "platform-team"
+      }
+    },
+    "max-upload-size-mb": {
+      "state": "ENABLED",
+      "variants": {
+        "default": 25,
+        "premium": 100,
+        "enterprise": 500
+      },
+      "defaultVariant": "default",
+      "targeting": {
+        "if": [
+          { "==": [{ "var": "plan" }, "enterprise"] },
+          "enterprise",
+          {
+            "if": [
+              { "==": [{ "var": "plan" }, "premium"] },
+              "premium",
+              "default"
+            ]
+          }
+        ]
+      },
+      "metadata": {
+        "description": "Maximum file upload size in megabytes, tiered by subscription plan.",
+        "owner": "storage-team"
+      }
+    },
+    "onboarding-flow": {
+      "state": "ENABLED",
+      "variants": {
+        "classic": {
+          "steps": ["welcome", "profile", "invite-team", "done"],
+          "showProgressBar": true
+        },
+        "streamlined": {
+          "steps": ["welcome", "done"],
+          "showProgressBar": false
+        }
+      },
+      "defaultVariant": "classic",
+      "targeting": {
+        "if": [
+          { "==": [{ "var": "signup_source" }, "product-hunt"] },
+          "streamlined",
+          "classic"
+        ]
+      },
+      "metadata": {
+        "description": "Onboarding wizard configuration. Product Hunt signups get a streamlined flow to reduce drop-off, everyone else gets the full onboarding.",
+        "owner": "growth-team"
+      }
+    },
+    "rate-limit-rps": {
+      "state": "ENABLED",
+      "variants": {
+        "standard": 100,
+        "elevated": 500,
+        "unlimited": 10000
+      },
+      "defaultVariant": "standard",
+      "metadata": {
+        "description": "API rate limit in requests per second. Tiered by customer plan.",
+        "owner": "api-platform"
+      }
+    },
+    "enable-webhooks": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "on",
+      "metadata": {
+        "description": "Webhook delivery system. Can be disabled globally as a circuit breaker if the delivery pipeline is backing up.",
+        "owner": "integrations-team"
+      }
+    },
+    "recommendation-engine": {
+      "state": "ENABLED",
+      "variants": {
+        "collaborative": "collaborative-filtering",
+        "content-based": "content-based",
+        "hybrid": "hybrid-v2"
+      },
+      "defaultVariant": "collaborative",
+      "targeting": {
+        "fractional": [
+          { "var": "targeting_key" },
+          ["collaborative", 50],
+          ["hybrid", 50]
+        ]
+      },
+      "metadata": {
+        "description": "Product recommendation algorithm. Currently A/B testing collaborative filtering against the new hybrid model that combines collaborative and content-based signals.",
+        "owner": "ml-team"
+      }
+    },
+    "password-policy": {
+      "state": "ENABLED",
+      "variants": {
+        "standard": {
+          "minLength": 8,
+          "requireUppercase": true,
+          "requireNumber": true,
+          "requireSpecial": false
+        },
+        "strict": {
+          "minLength": 12,
+          "requireUppercase": true,
+          "requireNumber": true,
+          "requireSpecial": true
+        }
+      },
+      "defaultVariant": "standard",
+      "targeting": {
+        "if": [
+          { "in": [{ "var": "industry" }, ["healthcare", "finance", "government"]] },
+          "strict",
+          "standard"
+        ]
+      },
+      "metadata": {
+        "description": "Password complexity requirements. Regulated industries get strict policy automatically.",
+        "owner": "security-team"
+      }
+    },
+    "notifications-v2": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "fractional": [
+          { "var": "targeting_key" },
+          ["on", 25],
+          ["off", 75]
+        ]
+      },
+      "metadata": {
+        "description": "New notification center with real-time updates, grouping, and snooze. Rolling out to 25% of users, increasing weekly.",
+        "owner": "notifications-team"
+      }
+    },
+    "beta-api-v3": {
+      "state": "DISABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "metadata": {
+        "description": "API v3 beta endpoints. Not yet ready for traffic — keeping flag in place for when we begin the beta program next quarter.",
+        "owner": "api-platform"
+      }
+    },
+    "cdn-provider": {
+      "state": "ENABLED",
+      "variants": {
+        "cloudflare": "cloudflare",
+        "fastly": "fastly",
+        "cloudfront": "cloudfront"
+      },
+      "defaultVariant": "cloudflare",
+      "metadata": {
+        "description": "Active CDN provider for static assets. Allows instant failover between providers during outages without a deploy.",
+        "owner": "platform-team"
+      }
+    },
+    "ai-summarization": {
+      "state": "ENABLED",
+      "variants": {
+        "on": true,
+        "off": false
+      },
+      "defaultVariant": "off",
+      "targeting": {
+        "if": [
+          { "in": [{ "var": "plan" }, ["premium", "enterprise"]] },
+          "on",
+          "off"
+        ]
+      },
+      "metadata": {
+        "description": "AI-powered content summarization for documents and threads. Available to premium and enterprise customers.",
+        "owner": "ai-team"
+      }
+    },
+    "signup-captcha": {
+      "state": "ENABLED",
+      "variants": {
+        "none": "none",
+        "recaptcha": "recaptcha-v3",
+        "turnstile": "cloudflare-turnstile"
+      },
+      "defaultVariant": "turnstile",
+      "metadata": {
+        "description": "CAPTCHA provider for signup form. Migrated from reCAPTCHA to Cloudflare Turnstile for better UX.",
+        "owner": "security-team"
+      }
+    }
+  }
+}

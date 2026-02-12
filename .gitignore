@@ -10,5 +10,10 @@ frontend/dist/
 web/dist/*
 !web/dist/.gitkeep
 
+# Demo recording artifacts
+demo/recording/raw/
+demo/recording/*.webm
+demo/recording/node_modules/
+
 # OS
 .DS_Store

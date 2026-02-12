@@ -1,4 +1,4 @@
-.PHONY: dev dev-backend dev-frontend build clean
+.PHONY: dev dev-backend dev-frontend build clean demo record-demo
 
 # Run both backend and frontend in dev mode.
 # In two terminals:
@@ -24,3 +24,18 @@ frontend/dist: $(shell find frontend/src -type f) frontend/package.json frontend
 clean:
 	rm -rf flagd-ui frontend/dist web/dist
 	mkdir -p web/dist && touch web/dist/.gitkeep
+
+# Run the demo sandbox with sample flags.
+demo: build
+	@echo "Starting flagd-ui with demo flags at http://localhost:8080"
+	./flagd-ui -flag-dir ./demo
+
+# Record a demo video (starts the server, records, then stops).
+record-demo: build
+	@mkdir -p demo/recording/raw
+	./flagd-ui -flag-dir ./demo -addr :8080 & \
+		SERVER_PID=$$!; \
+		sleep 2; \
+		node demo/recording/record.mjs; \
+		kill $$SERVER_PID 2>/dev/null; \
+		echo "Done. Video at demo/recording/flagd-ui-demo.webm"
