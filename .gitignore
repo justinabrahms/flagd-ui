@@ -13,6 +13,8 @@ web/dist/*
 # Demo recording artifacts
 demo/recording/raw/
 demo/recording/*.webm
+demo/recording/*.mp4
+demo/recording/bg-music.mp3
 demo/recording/node_modules/
 
 # OS

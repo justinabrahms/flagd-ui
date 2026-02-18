@@ -27,8 +27,8 @@ export function FlagDetail() {
 
   const description =
     flag.metadata && typeof flag.metadata === "object"
-      ? (flag.metadata as Record<string, unknown>).description
-      : null;
+      ? String((flag.metadata as Record<string, unknown>).description ?? "")
+      : "";
 
   const variants = Object.entries(flag.variants);
 
@@ -119,7 +119,7 @@ export function FlagDetail() {
         </div>
       </div>
 
-      {flag.targeting && (
+      {!!flag.targeting && (
         <div className="detail-section">
           <h2>Targeting Rules</h2>
           <div className="detail-card">

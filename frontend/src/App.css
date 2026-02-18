@@ -225,9 +225,16 @@
 
 .detail-summary::before {
   content: "\25B6";
-  font-size: 0.6rem;
+  font-size: 0.55rem;
+  line-height: 1;
   color: var(--text-muted);
   transition: transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
 }
 
 details[open] > .detail-summary::before {
