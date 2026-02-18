@@ -52,6 +52,7 @@ make build
 | `-flag-dir` | | Path to directory containing flagd JSON config files |
 | `-sync-addr` | | flagd gRPC sync address (e.g. `localhost:8015`) |
 | `-addr` | `:9090` | Listen address |
+| `-base-path` | | URL prefix when running behind a reverse proxy (e.g. `/flagd-ui`) |
 | `-dev-proxy` | | Proxy frontend requests to a Vite dev server (development only) |
 
 Exactly one of `-flag-dir` or `-sync-addr` is required.

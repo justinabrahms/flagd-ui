@@ -3,12 +3,14 @@ import { FlagList } from "./pages/FlagList";
 import { FlagDetail } from "./pages/FlagDetail";
 import "./App.css";
 
+const base = (window as any).__BASE_PATH__ || '';
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={base}>
       <div className="app">
         <header className="app-header">
-          <a href="/" className="app-logo">flagd-ui</a>
+          <a href={base || "/"} className="app-logo">flagd-ui</a>
           <span className="app-subtitle">read-only</span>
         </header>
         <main className="app-main">

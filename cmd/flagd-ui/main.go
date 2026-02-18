@@ -10,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/justinabrahms/flagd-ui/internal/api"
@@ -23,6 +24,7 @@ func main() {
 		flagDir  = flag.String("flag-dir", "", "path to directory containing flagd config files")
 		syncAddr = flag.String("sync-addr", "", "flagd gRPC sync address (e.g. localhost:8015)")
 		devProxy = flag.String("dev-proxy", "", "proxy non-API requests to this URL (e.g. http://localhost:5173 for Vite)")
+		basePath = flag.String("base-path", "", "URL prefix when running behind a reverse proxy (e.g. /flagd-ui)")
 	)
 	flag.Parse()
 
@@ -30,6 +32,15 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error: exactly one of -flag-dir or -sync-addr is required")
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	// Normalize base path: ensure leading slash, strip trailing slash
+	bp := strings.TrimSpace(*basePath)
+	if bp != "" {
+		if !strings.HasPrefix(bp, "/") {
+			bp = "/" + bp
+		}
+		bp = strings.TrimRight(bp, "/")
 	}
 
 	var source flagsource.FlagSource
@@ -68,16 +79,24 @@ func main() {
 		mux.Handle("GET /", proxy)
 		log.Printf("proxying frontend to %s", *devProxy)
 	} else {
-		serveFrontend(mux)
+		serveFrontend(mux, bp)
+	}
+
+	var root http.Handler = mux
+	if bp != "" {
+		outer := http.NewServeMux()
+		outer.Handle(bp+"/", http.StripPrefix(bp, mux))
+		root = outer
+		log.Printf("serving under base path %s", bp)
 	}
 
 	log.Printf("flagd-ui listening on %s", *addr)
-	if err := http.ListenAndServe(*addr, mux); err != nil {
+	if err := http.ListenAndServe(*addr, root); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func serveFrontend(mux *http.ServeMux) {
+func serveFrontend(mux *http.ServeMux, basePath string) {
 	distFS, err := fs.Sub(web.DistFS, "dist")
 	if err != nil {
 		log.Printf("warning: no embedded frontend, API-only mode")
@@ -91,11 +110,25 @@ func serveFrontend(mux *http.ServeMux) {
 		return
 	}
 
+	// Read index.html once and inject base path script
+	indexBytes, err := fs.ReadFile(distFS, "index.html")
+	if err != nil {
+		log.Printf("warning: no index.html in embedded frontend")
+		return
+	}
+	indexHTML := string(indexBytes)
+	if basePath != "" {
+		injection := fmt.Sprintf(`<script>window.__BASE_PATH__="%s"</script>`, basePath)
+		indexHTML = strings.Replace(indexHTML, "<head>", "<head>"+injection, 1)
+	}
+
 	fileServer := http.FileServer(http.FS(distFS))
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
-			path = "/index.html"
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			fmt.Fprint(w, indexHTML)
+			return
 		}
 
 		f, err := distFS.Open(path[1:])
@@ -105,9 +138,9 @@ func serveFrontend(mux *http.ServeMux) {
 			return
 		}
 
-		// SPA fallback
-		r.URL.Path = "/"
-		fileServer.ServeHTTP(w, r)
+		// SPA fallback — serve modified index.html
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		fmt.Fprint(w, indexHTML)
 	})
 	log.Printf("serving embedded frontend")
 }
