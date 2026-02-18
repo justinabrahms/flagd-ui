@@ -2,6 +2,8 @@
 
 A read-only management interface for [flagd](https://flagd.dev), the CNCF OpenFeature-aligned feature flag daemon.
 
+[Watch the demo](demo/recording/flagd-ui-demo.mp4)
+
 ## Quick start
 
 ### File-based
