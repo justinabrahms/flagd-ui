@@ -17,6 +17,7 @@ build: web/dist
 web/dist: frontend/dist
 	rm -rf web/dist
 	cp -r frontend/dist web/dist
+	touch web/dist/.gitkeep
 
 frontend/dist: $(shell find frontend/src -type f) frontend/package.json frontend/index.html
 	cd frontend && npm run build
@@ -38,4 +39,4 @@ record-demo: build
 		sleep 2; \
 		node demo/recording/record.mjs; \
 		kill $$SERVER_PID 2>/dev/null; \
-		echo "Done. Video at demo/recording/flagd-ui-demo.webm"
+		echo "Done. Video at demo/recording/flagd-ui-demo.mp4"

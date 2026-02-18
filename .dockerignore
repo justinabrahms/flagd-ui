@@ -1,0 +1,7 @@
+.git
+frontend/node_modules
+frontend/dist
+web/dist
+demo/recording
+*.exe
+.DS_Store

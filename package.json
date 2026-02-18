@@ -1,0 +1,12 @@
+{
+  "name": "flagd-ui",
+  "version": "1.0.0",
+  "description": "A management interface for [flagd](https://flagd.dev), the CNCF OpenFeature-aligned feature flag daemon.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
