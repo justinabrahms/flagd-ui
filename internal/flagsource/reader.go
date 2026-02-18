@@ -1,38 +1,11 @@
 package flagsource
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 )
-
-// Flag represents a single flagd feature flag.
-type Flag struct {
-	Key            string          `json:"key"`
-	State          string          `json:"state"`
-	Variants       json.RawMessage `json:"variants"`
-	DefaultVariant string          `json:"defaultVariant"`
-	Targeting      json.RawMessage `json:"targeting,omitempty"`
-	Metadata       json.RawMessage `json:"metadata,omitempty"`
-	Source         string          `json:"source"` // which file this flag came from
-}
-
-// flagFile is the top-level structure of a flagd config file.
-type flagFile struct {
-	Schema string                     `json:"$schema"`
-	Flags  map[string]json.RawMessage `json:"flags"`
-}
-
-// flagDef is the per-flag structure inside a flagd config file.
-type flagDef struct {
-	State          string          `json:"state"`
-	Variants       json.RawMessage `json:"variants"`
-	DefaultVariant string          `json:"defaultVariant"`
-	Targeting      json.RawMessage `json:"targeting,omitempty"`
-	Metadata       json.RawMessage `json:"metadata,omitempty"`
-}
 
 // Reader reads flagd configuration files from a directory.
 type Reader struct {
@@ -116,33 +89,7 @@ func parseFile(path string) ([]Flag, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	var file flagFile
-	if err := json.Unmarshal(data, &file); err != nil {
-		return nil, err
-	}
-
-	if file.Flags == nil {
-		return nil, fmt.Errorf("not a flagd config file: %s", path)
-	}
-
-	var flags []Flag
-	for key, raw := range file.Flags {
-		var def flagDef
-		if err := json.Unmarshal(raw, &def); err != nil {
-			continue
-		}
-		flags = append(flags, Flag{
-			Key:            key,
-			State:          def.State,
-			Variants:       def.Variants,
-			DefaultVariant: def.DefaultVariant,
-			Targeting:      def.Targeting,
-			Metadata:       def.Metadata,
-			Source:         filepath.Base(path),
-		})
-	}
-	return flags, nil
+	return ParseFlagJSON(data, filepath.Base(path))
 }
 
 // Flags returns all loaded flags.

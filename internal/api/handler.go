@@ -10,11 +10,11 @@ import (
 )
 
 type Handler struct {
-	reader *flagsource.Reader
+	source flagsource.FlagSource
 }
 
-func NewHandler(reader *flagsource.Reader) *Handler {
-	return &Handler{reader: reader}
+func NewHandler(source flagsource.FlagSource) *Handler {
+	return &Handler{source: source}
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
@@ -28,7 +28,7 @@ type listResponse struct {
 }
 
 func (h *Handler) listFlags(w http.ResponseWriter, r *http.Request) {
-	flags := h.reader.Flags()
+	flags := h.source.Flags()
 
 	// Search filter
 	if q := r.URL.Query().Get("q"); q != "" {
@@ -64,7 +64,7 @@ func (h *Handler) listFlags(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getFlag(w http.ResponseWriter, r *http.Request) {
 	key := r.PathValue("key")
-	flag, ok := h.reader.Flag(key)
+	flag, ok := h.source.Flag(key)
 	if !ok {
 		http.Error(w, `{"error":"flag not found"}`, http.StatusNotFound)
 		return

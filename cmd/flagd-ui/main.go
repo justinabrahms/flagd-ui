@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io/fs"
@@ -9,6 +10,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/justinabrahms/flagd-ui/internal/api"
 	"github.com/justinabrahms/flagd-ui/internal/flagsource"
@@ -19,28 +21,41 @@ func main() {
 	var (
 		addr     = flag.String("addr", ":9090", "listen address")
 		flagDir  = flag.String("flag-dir", "", "path to directory containing flagd config files")
+		syncAddr = flag.String("sync-addr", "", "flagd gRPC sync address (e.g. localhost:8015)")
 		devProxy = flag.String("dev-proxy", "", "proxy non-API requests to this URL (e.g. http://localhost:5173 for Vite)")
 	)
 	flag.Parse()
 
-	if *flagDir == "" {
-		fmt.Fprintln(os.Stderr, "error: -flag-dir is required")
+	if (*flagDir == "" && *syncAddr == "") || (*flagDir != "" && *syncAddr != "") {
+		fmt.Fprintln(os.Stderr, "error: exactly one of -flag-dir or -sync-addr is required")
 		flag.Usage()
 		os.Exit(1)
 	}
 
-	reader := flagsource.NewReader(*flagDir)
-	if err := reader.Load(); err != nil {
-		log.Fatalf("loading flags from %s: %v", *flagDir, err)
-	}
+	var source flagsource.FlagSource
 
-	flags := reader.Flags()
-	log.Printf("loaded %d flags from %s", len(flags), *flagDir)
+	if *syncAddr != "" {
+		syncer := flagsource.NewGRPCSyncer(*syncAddr)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := syncer.Start(ctx); err != nil {
+			log.Fatalf("grpc sync to %s: %v", *syncAddr, err)
+		}
+		source = syncer
+		log.Printf("syncing flags from %s via gRPC", *syncAddr)
+	} else {
+		reader := flagsource.NewReader(*flagDir)
+		if err := reader.Load(); err != nil {
+			log.Fatalf("loading flags from %s: %v", *flagDir, err)
+		}
+		log.Printf("loaded %d flags from %s", len(reader.Flags()), *flagDir)
+		source = reader
+	}
 
 	mux := http.NewServeMux()
 
 	// API routes
-	handler := api.NewHandler(reader)
+	handler := api.NewHandler(source)
 	handler.RegisterRoutes(mux)
 
 	// Frontend
