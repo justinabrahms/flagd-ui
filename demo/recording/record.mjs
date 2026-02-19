@@ -6,60 +6,6 @@ const OUTPUT = process.env.OUTPUT || "demo/recording/flagd-ui-demo.gif";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
-// Theme tokens (match frontend/src/index.css)
-// ---------------------------------------------------------------------------
-const THEME = {
-  bg: "#0f1117",
-  bgSurface: "#1a1d27",
-  border: "#2e3347",
-  text: "#e1e4ed",
-  textMuted: "#8b8fa7",
-  accent: "#6e7bf2",
-  accentHover: "#8490ff",
-  green: "#34d399",
-  fontStack: `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
-  monoStack: `"JetBrains Mono", "Fira Code", "Cascadia Code", monospace`,
-};
-
-// ---------------------------------------------------------------------------
-// Title card HTML generator
-// ---------------------------------------------------------------------------
-function titleCardHTML({ lines, subtitle, small }) {
-  // lines: array of {text, size?, mono?, color?, bold?, spacing?}
-  const lineEls = lines
-    .map((l) => {
-      const size = l.size || "2.8rem";
-      const color = l.color || THEME.text;
-      const font = l.mono ? THEME.monoStack : THEME.fontStack;
-      const weight = l.bold !== false ? "700" : "400";
-      const spacing = l.spacing || (l.size && parseFloat(l.size) < 2 ? "0.01em" : "-0.02em");
-      return `<div style="font-size:${size};color:${color};font-family:${font};font-weight:${weight};line-height:1.2;letter-spacing:${spacing};margin:0;">${l.text}</div>`;
-    })
-    .join("\n");
-
-  const subtitleEl = subtitle
-    ? `<div style="font-size:1.15rem;color:${THEME.textMuted};font-family:${THEME.fontStack};font-weight:400;margin-top:2rem;max-width:580px;line-height:1.7;letter-spacing:0.01em;">${subtitle}</div>`
-    : "";
-
-  const smallEl = small
-    ? `<div style="font-size:0.9rem;color:${THEME.textMuted};font-family:${THEME.monoStack};font-weight:400;margin-top:2.5rem;opacity:0.5;letter-spacing:0.03em;">${small}</div>`
-    : "";
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="margin:0;display:flex;align-items:center;justify-content:center;flex-direction:column;height:100vh;background:${THEME.bg};text-align:center;padding:3rem;gap:0.3rem;">
-${lineEls}
-${subtitleEl}
-${smallEl}
-</body></html>`;
-}
-
-// Show a title card via setContent (works reliably in headless, no navigation)
-async function showTitleCard(page, opts) {
-  await page.setContent(titleCardHTML(opts), { waitUntil: "load" });
-}
-
-// ---------------------------------------------------------------------------
 // Fake cursor helpers
 // ---------------------------------------------------------------------------
 async function injectCursor(page) {
@@ -249,18 +195,6 @@ async function main() {
   const page = await context.newPage();
 
   // =========================================================================
-  // TITLE CARD: Intro
-  // =========================================================================
-  console.log("Title card: Intro");
-  await showTitleCard(page, {
-    lines: [
-      { text: "flagd-ui", size: "3.5rem", mono: true, color: THEME.accent },
-      { text: "A management UI for flagd", size: "1.4rem", color: THEME.textMuted, bold: false },
-    ],
-  });
-  await sleep(3000);
-
-  // =========================================================================
   // LIVE DEMO
   // =========================================================================
 
@@ -395,18 +329,7 @@ async function main() {
   await sleep(1500);
 
   await hideCursor(page);
-
-  // =========================================================================
-  // TITLE CARD: Outro
-  // =========================================================================
-  console.log("Title card: Outro");
-  await showTitleCard(page, {
-    lines: [
-      { text: "flagd-ui", size: "2.6rem", mono: true, color: THEME.accent },
-    ],
-    subtitle: "Open source read-only UI for flagd.",
-  });
-  await sleep(3000);
+  await sleep(500);
 
   // =========================================================================
   // Finalize
