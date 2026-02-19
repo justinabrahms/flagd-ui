@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const BASE = process.env.BASE_URL || "http://localhost:9090";
-const OUTPUT = process.env.OUTPUT || "demo/recording/flagd-ui-demo.mp4";
+const OUTPUT = process.env.OUTPUT || "demo/recording/flagd-ui-demo.gif";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -261,26 +261,6 @@ async function main() {
   await sleep(3000);
 
   // =========================================================================
-  // TITLE CARD: Problem
-  // =========================================================================
-  console.log("Title card: Problem");
-  await showTitleCard(page, {
-    lines: [{ text: "The problem", size: "1.8rem", color: THEME.textMuted }],
-    subtitle:
-      "Teams manage flagd by editing YAML and committing to git.<br>There\u2019s no dashboard, no search, no visibility.",
-  });
-  await sleep(3500);
-
-  // =========================================================================
-  // TITLE CARD: Transition
-  // =========================================================================
-  console.log("Title card: Transition");
-  await showTitleCard(page, {
-    lines: [{ text: "What if you had a UI?", size: "2.2rem", color: THEME.text }],
-  });
-  await sleep(2000);
-
-  // =========================================================================
   // LIVE DEMO
   // =========================================================================
 
@@ -417,17 +397,16 @@ async function main() {
   await hideCursor(page);
 
   // =========================================================================
-  // TITLE CARD: CTA / Outro
+  // TITLE CARD: Outro
   // =========================================================================
-  console.log("Title card: CTA");
+  console.log("Title card: Outro");
   await showTitleCard(page, {
     lines: [
       { text: "flagd-ui", size: "2.6rem", mono: true, color: THEME.accent },
     ],
-    subtitle:
-      "Free and open source.<br>Pro tier adds editing, RBAC, and GitOps.",
+    subtitle: "Open source read-only UI for flagd.",
   });
-  await sleep(4500);
+  await sleep(3000);
 
   // =========================================================================
   // Finalize
@@ -446,37 +425,20 @@ async function main() {
     });
     const webmSrc = path.join(rawDir, files[0]);
 
-    // Keep the .webm copy
-    const webmOut = OUTPUT.replace(/\.mp4$/, ".webm");
-    fs.copyFileSync(webmSrc, webmOut);
-    console.log(`WebM saved to ${webmOut}`);
-
-    // Convert to .mp4 (H.264) with background music for Slack/browser inline playback.
-    // Music: fade in 2s, low volume (15%), fade out over last 3s of the video.
-    const mp4Out = OUTPUT.replace(/\.webm$/, ".mp4");
-    const musicSrc = path.join(path.dirname(webmSrc), "..", "bg-music.mp3");
-    console.log("Converting to mp4 with background music...");
-    if (fs.existsSync(musicSrc)) {
-      execSync(
-        [
-          "ffmpeg -y",
-          `-i ${JSON.stringify(webmSrc)}`,
-          `-i ${JSON.stringify(musicSrc)}`,
-          `-filter_complex "[1:a]atrim=0:duration=55,afade=t=in:st=0:d=2,afade=t=out:st=49:d=4,volume=0.15[music];[music]apad[aout]"`,
-          `-map 0:v -map "[aout]"`,
-          `-c:v libx264 -pix_fmt yuv420p -c:a aac -shortest`,
-          JSON.stringify(mp4Out),
-        ].join(" "),
-        { stdio: "inherit" }
-      );
-    } else {
-      console.log("No bg-music.mp3 found, encoding without music.");
-      execSync(
-        `ffmpeg -y -i ${JSON.stringify(webmSrc)} -c:v libx264 -pix_fmt yuv420p -c:a aac ${JSON.stringify(mp4Out)}`,
-        { stdio: "inherit" }
-      );
-    }
-    console.log(`MP4 saved to ${mp4Out}`);
+    // Convert to GIF for README embedding.
+    // Two-pass: generate palette first for better quality, then render.
+    const gifOut = OUTPUT.replace(/\.webm$/, ".gif");
+    const palettePath = path.join(rawDir, "palette.png");
+    console.log("Converting to GIF...");
+    execSync(
+      `ffmpeg -y -i ${JSON.stringify(webmSrc)} -vf "fps=12,scale=960:-1:flags=lanczos,palettegen=stats_mode=diff" ${JSON.stringify(palettePath)}`,
+      { stdio: "inherit" }
+    );
+    execSync(
+      `ffmpeg -y -i ${JSON.stringify(webmSrc)} -i ${JSON.stringify(palettePath)} -lavfi "fps=12,scale=960:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5" ${JSON.stringify(gifOut)}`,
+      { stdio: "inherit" }
+    );
+    console.log(`GIF saved to ${gifOut}`);
   }
 
   await browser.close();

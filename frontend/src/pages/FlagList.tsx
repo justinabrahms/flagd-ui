@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { fetchFlags } from "../api";
 import type { Flag } from "../types";
@@ -22,6 +22,20 @@ export function FlagList() {
   const [stateFilter, setStateFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -48,9 +62,10 @@ export function FlagList() {
           <span className="flag-count">{total} flags loaded</span>
         </div>
         <input
+          ref={searchRef}
           className="search-input"
           type="text"
-          placeholder="Search flags..."
+          placeholder="Search flags…  (/)"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
